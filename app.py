@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from datetime import timedelta
+from flask_mysqldb import MySQL
+import MySQLdb.cursors
 
 app = Flask(__name__)
+mysql = MySQL(app)
 
 @app.route("/leaving",methods=['GET'])
 def leaving():

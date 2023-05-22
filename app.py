@@ -8,7 +8,13 @@ mysql = MySQL(app)
 
 @app.route("/leaving",methods=['GET'])
 def leaving():
-    return render_template('leaveoffice.html')
+    if 'loggedin' in session:
+           # We need all the account info for the user so we can display it on the profile page
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM users WHERE userid = %s', (session['id'],))
+        account = cursor.fetchone()
+        return render_template('leaveoffice.html', account=account)
+    return redirect(url_for('login'))
 
 
 @app.route('/login',methods=['GET','POST'])

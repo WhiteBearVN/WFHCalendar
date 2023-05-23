@@ -12,26 +12,37 @@ document.addEventListener('DOMContentLoaded', function () {
     hiddenDays: [ 0, 6 ],
     weekNumbers: true,
     dayMaxEvents: true, // allow "more" link when too many events
-    events: 'https://fullcalendar.io/api/demo-feeds/events.json',
+    events: {
+      url: 'leavedays',
+      error: function() {
+        $('#script-warning').show();
+      }
+    },
     dateClick: function(info) {
       //Create event
       var result = confirm("Confirm to leave office this date?");
 
-        if (result) {
-            var event = {
-            title: '... Leave office',
-            start: info.dateStr 
-         };
-            const body = {
-            leaveday: info.dateStr
-            };
-            $.post("https://jsonplaceholder.typicode.com/todos", body, (data, status) => {
-            console.log(data);
-            });
-
-        } else {
-        // Nothing
-        }
+if (result) {
+  var event = {
+    title: 'Registered, please refesh page',
+    color: '#2b31db',
+    start: info.dateStr 
+  };
+  
+  var body = {
+    leaveday: info.dateStr
+  };
+  
+  fetch("https://whitebearvn-ideal-succotash-46pqvgp6v463vw6-5000.preview.app.github.dev/api/leaveday", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+} else {
+  // Nothing
+}
 
       // Add event to calendar, comment after done backend
       calendar.addEvent(event);

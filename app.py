@@ -109,19 +109,19 @@ def return_data():
 
 #work from home
 @app.route("/workfromhome",methods=['GET'])
-def leaving():
+def workfromhome():
     if 'loggedin' in session:
            # We need all the account info for the user so we can display it on the profile page
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM users WHERE userid = %s', (session['id'],))
         account = cursor.fetchone()
-        return render_template('leaveoffice.html', account=account)
+        return render_template('workfromhome.html', account=account)
     return redirect(url_for('login'))
 
 
 
 @app.route('/api/workday', methods=['POST'])
-def check_leaveday():
+def check_workday():
 
     if 'username' not in session:
         return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
@@ -131,7 +131,7 @@ def check_leaveday():
         workday = data.get('workday')
 
         # Kiểm tra định dạng ngày
-        if is_valid_date(leaveday):
+        if is_valid_date(workday):
             if write_leaveday("username", workday):
                 return jsonify({'status': 'success'})
             else:
@@ -175,7 +175,7 @@ def write_workday(username,workday):
         print('Error writing workday:', str(e))
 
 @app.route('/workdays')
-def return_data():
+def return_data2():
     if 'username' not in session:
         return redirect(url_for('login'))
     else:

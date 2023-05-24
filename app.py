@@ -15,12 +15,12 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=30)
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'calendar'
-app.config['MYSQL_PASSWORD'] = 'XXXXXXXXXXXXXXXXXX'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'calendar'
 mysql = MySQL(app)
 
 
-
+#leave office
 @app.route("/leaving",methods=['GET'])
 def leaving():
     if 'loggedin' in session:
@@ -89,18 +89,116 @@ def write_leaveday(username,leaveday):
 
 @app.route('/leavedays')
 def return_data():
-    start_date = request.args.get('start', '')
-    end_date = request.args.get('end', '')
-    # You'd normally use the variables above to limit the data returned
-    # you don't want to return ALL events like in this code
-    # but since no db or any real storage is implemented I'm just
-    # returning data from a text file that contains json elements
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    else:
+        start_date = request.args.get('start', '')
+        end_date = request.args.get('end', '')
+        # You'd normally use the variables above to limit the data returned
+        # you don't want to return ALL events like in this code
+        # but since no db or any real storage is implemented I'm just
+        # returning data from a text file that contains json elements
 
-    with open("leavedays.json", "r") as input_data:
-        # you should use something else here than just plaintext
-        # check out jsonfiy method or the built in json module
-        # http://flask.pocoo.org/docs/0.10/api/#module-flask.json
-        return input_data.read()
+        with open("leavedays.json", "r") as input_data:
+            # you should use something else here than just plaintext
+            # check out jsonfiy method or the built in json module
+            # http://flask.pocoo.org/docs/0.10/api/#module-flask.json
+            return input_data.read()
+
+#===============================================
+
+#work from home
+@app.route("/workfromhome",methods=['GET'])
+def leaving():
+    if 'loggedin' in session:
+           # We need all the account info for the user so we can display it on the profile page
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM users WHERE userid = %s', (session['id'],))
+        account = cursor.fetchone()
+        return render_template('leaveoffice.html', account=account)
+    return redirect(url_for('login'))
+
+
+
+@app.route('/api/workday', methods=['POST'])
+def check_leaveday():
+
+    if 'username' not in session:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+    
+    try:
+        data = request.get_json()
+        workday = data.get('workday')
+
+        # Kiểm tra định dạng ngày
+        if is_valid_date(leaveday):
+            if write_leaveday("username", workday):
+                return jsonify({'status': 'success'})
+            else:
+                return jsonify({'status': 'error', 'message': 'User already registered for the given date'})
+        else:
+            return jsonify({'status': 'error'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+def is_valid_date(date_string):
+    try:
+        # Kiểm tra định dạng ngày
+        datetime.datetime.strptime(date_string, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+def write_workday(username,workday):
+    color = session['colors']
+    try:
+        # Đọc dữ liệu hiện có từ tệp tin JSON
+        with open('workdays.json', 'r') as file:
+            data = json.load(file)
+
+        for item in data:
+            if item["username"] == session['username'] and item["start"] == workday:
+                return False
+        # Thêm thông tin mới vào danh sách
+        data.append({
+            "title": "fullname",
+            "color": color,
+            "start": workday,
+            "username": session['username']
+        })
+
+        # Ghi lại dữ liệu vào tệp tin JSON
+        with open('workdays.json', 'w') as file:
+            json.dump(data, file)
+        return True
+    except Exception as e:
+        print('Error writing workday:', str(e))
+
+@app.route('/workdays')
+def return_data():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    else:
+        start_date = request.args.get('start', '')
+        end_date = request.args.get('end', '')
+        # You'd normally use the variables above to limit the data returned
+        # you don't want to return ALL events like in this code
+        # but since no db or any real storage is implemented I'm just
+        # returning data from a text file that contains json elements
+
+        with open("workdays.json", "r") as input_data:
+            # you should use something else here than just plaintext
+            # check out jsonfiy method or the built in json module
+            # http://flask.pocoo.org/docs/0.10/api/#module-flask.json
+            return input_data.read()
+
+
+
+
+
+
+
+
 
 @app.route('/login',methods=['GET','POST'])
 def login():
@@ -126,6 +224,18 @@ def login():
             flash('Sai tên đăng nhập hoặc mật khẩu')
     # Show the login form with message (if any)
     return render_template('login.html', msg=msg)
+
+@app.route('/logout',methods=['GET'])
+def logout():
+    if 'username' in session:
+        session.pop('username', None)
+        session.pop('id', None)
+        session.pop('loggedin', None)
+        session.pop('colors', None)
+        return redirect(url_for('login'))
+    else:
+        return redirect(url_for('login'))
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

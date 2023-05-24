@@ -11,7 +11,6 @@
 
 <script src="{{ url_for('static',filename='javascript/leaveoffice.js')}}"></script>
 <link href="{{ url_for('static', filename='css/calendar.css' )}}"rel='stylesheet'>
-
 <body>
     <div id='header'>
         <nav class="navbar navbar-expand-lg navbar-dark  bg-primary">
@@ -25,7 +24,7 @@
           </a>
           </li>
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="/">Home</a>
+                <a class="nav-link" aria-current="page" href="/">Home</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="leaving">Leave office</a>
@@ -33,45 +32,28 @@
               <li class="nav-item">
                 <a class="nav-link" href="workfromhome">Work From Home</a>
               </li>
-              
+              <li class="nav-item">
+                <a class="nav-link active" href="plan">Plan</a>
+              </li>
               
               </li>
             </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="/logout">Log out</a>
+                </li>
+              </ul>
           </div>
         </div>
       </nav>
         </div>
         <div class="container">
-			<form class="form-signin" method="post">
-                <div class="text-center mb-4">
-                    <h1 class="h3 mb-3 font-weight-normal">Who are you?!</h1>
-                </div>
-    
-                <div class="form-label-group">
-                    <input id="username" class="form-control" name="username" placeholder="Username" required autofocus>
-                    <label for="inputUser"></label>
-                </div>  
-    
-                <div class="form-label-group">
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Password"
-                        required>
-                    <label for="inputPassword"></label>
-                </div>
-                <input class="btn btn-lg btn-primary" type="submit" value="Login">
-            </form>
-            
-            {% block content %}
-                <div class="container">
-                    {% for message in get_flashed_messages() %}
-                    <div class="alert alert-warning">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        {{ message }}
-                    </div>
-                    {% endfor %}
-
-                    {% block page_content %}{% endblock %}
-                </div>
-{% endblock %}
+            <h3> In process </h3>
+            <ul>
+                <li>Change password</li>
+                <li>Select date range</li>
+                <li>Self remove date</li>
+            </ul>
                 
 		</div>
 </body>

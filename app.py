@@ -63,7 +63,7 @@ def is_valid_date(date_string):
         return False
 
 def write_leaveday(username,leaveday):
-    color = session['colors']
+    color = session['color']
     try:
         # Đọc dữ liệu hiện có từ tệp tin JSON
         with open('leavedays.json', 'r') as file:
@@ -74,7 +74,7 @@ def write_leaveday(username,leaveday):
                 return False
         # Thêm thông tin mới vào danh sách
         data.append({
-            "title": "fullname",
+            "title": session["fullname"],
             "color": color,
             "start": leaveday,
             "username": session['username']
@@ -132,7 +132,7 @@ def check_workday():
 
         # Kiểm tra định dạng ngày
         if is_valid_date(workday):
-            if write_leaveday("username", workday):
+            if write_workday("username", workday):
                 return jsonify({'status': 'success'})
             else:
                 return jsonify({'status': 'error', 'message': 'User already registered for the given date'})
@@ -150,7 +150,7 @@ def is_valid_date(date_string):
         return False
 
 def write_workday(username,workday):
-    color = session['colors']
+    color = session['color']
     try:
         # Đọc dữ liệu hiện có từ tệp tin JSON
         with open('workdays.json', 'r') as file:
@@ -161,7 +161,7 @@ def write_workday(username,workday):
                 return False
         # Thêm thông tin mới vào danh sách
         data.append({
-            "title": "fullname",
+            "title": session["fullname"],
             "color": color,
             "start": workday,
             "username": session['username']
@@ -194,12 +194,12 @@ def return_data2():
 
 
 
+#=============================
 
 
 
 
-
-
+# authen
 @app.route('/login',methods=['GET','POST'])
 def login():
     msg=''
@@ -208,15 +208,16 @@ def login():
         username = request.form['username']
         password = request.form['password']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM users WHERE username = %s AND user_password = md5(%s)', (username, password,))
+        cursor.execute('SELECT * FROM users WHERE username = %s AND password = md5(%s)', (username, password,))
         user = cursor.fetchone()
         # If account exists in accounts table in out database
         if username is not None:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
-            session['id'] = user['userid']
+            session['id'] = str(user['userid'])
             session['username'] = user['username']
-            session['colors'] = str(user['colors'])
+            session['color'] = str(user['colors'])
+            session['fullname'] = str(user['fullname'])
             # Redirect to calendar page
             return redirect(url_for('leaving'))
         else:
@@ -235,6 +236,20 @@ def logout():
         return redirect(url_for('login'))
     else:
         return redirect(url_for('login'))
+
+
+@app.route('/',methods=['GET'])
+def index():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('index.html')
+
+@app.route('/plan',methods=['GET'])
+def plan():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('plan.html')
+
 
 
 if __name__ == "__main__":

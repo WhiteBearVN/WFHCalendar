@@ -52,7 +52,7 @@ def check_leaveday():
         else:
             return jsonify({'status': 'error'})
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 400
+        return jsonify({'status': 'error'}), 400
 
 def is_valid_date(date_string):
     try:
@@ -139,7 +139,7 @@ def check_workday():
         else:
             return jsonify({'status': 'error'})
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 400
+        return jsonify({'status': 'error'}), 400
 
 def is_valid_date(date_string):
     try:

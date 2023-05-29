@@ -244,11 +244,11 @@ def index():
         return redirect(url_for('login'))
     return render_template('index.html')
 
-@app.route('/plan',methods=['GET'])
-def plan():
+@app.route('/changelog',methods=['GET'])
+def changelog():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('plan.html')
+    return render_template('changelog.html')
 
 
 

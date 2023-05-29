@@ -211,7 +211,7 @@ def login():
         cursor.execute('SELECT * FROM users WHERE username = %s AND password = md5(%s)', (username, password,))
         user = cursor.fetchone()
         # If account exists in accounts table in out database
-        if username is not None:
+        if user is not None:
             # Create session data, we can access this data in other routes
             session['loggedin'] = True
             session['id'] = str(user['userid'])
